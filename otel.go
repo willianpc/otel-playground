@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -25,7 +27,7 @@ func tracerProvider(url string) (*sdktrace.TracerProvider, error) {
 			semconv.SchemaURL,
 			semconv.ServiceName("otel playground"),
 			attribute.String("environment", "development"),
-			attribute.Int64("ID", 1),
+			attribute.Int64("ID", int64(os.Getpid())),
 		)),
 	)
 
