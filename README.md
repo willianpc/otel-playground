@@ -1,0 +1,2 @@
+# otel-playground
+OpenTelemetry Playground
