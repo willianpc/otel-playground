@@ -8,9 +8,22 @@ services:
     - 6832:6832/udp
     - 5778:5778
     - 16686:16686
-    - 4317:4317
-    - 4318:4318
+    # - 4317:4317
+    # - 4318:4318
     - 14250:14250
     - 14268:14268
     - 14269:14269
     - 9411:9411
+
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.79.0
+    volumes:
+      - ./config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension

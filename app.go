@@ -16,8 +16,9 @@ import (
 )
 
 func init() {
-	// Create a new tracer provider with a batch span processor and the given exporter.
-	tp, err := tracerProvider("http://localhost:14268/api/traces")
+	otlp := newGRPCExporter(context.Background(), "localhost:4317")
+
+	tp, err := tracerProvider(otlp)
 
 	if err != nil {
 		panic(err)
@@ -47,7 +48,6 @@ func main() {
 		}
 	}(ctx)
 
-	// Manual instrumentation
 	mux.HandleFunc("/foo", handleManual())
 
 	helloHandler := handleOtelHTTP()
@@ -58,6 +58,7 @@ func main() {
 	log.Fatal(http.ListenAndServe("0.0.0.0:9090", mux))
 }
 
+// handleManual instruments HTTP incoming calls manually
 func handleManual() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tp := otel.GetTracerProvider()
@@ -78,20 +79,20 @@ func handleManual() http.HandlerFunc {
 		sp.SetAttributes(attrs...)
 		defer sp.End()
 
-		fmt.Fprint(w, "I am foo.")
+		fmt.Fprint(w, "I am foo.\n")
 	}
 }
 
+// handleOtelHTTP instruments HTTP incoming calls using go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
 func handleOtelHTTP() http.HandlerFunc {
-	// Instrumenting with go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
 	uk := attribute.Key("username")
 
 	return func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		span := trace.SpanFromContext(ctx)
 		bag := baggage.FromContext(ctx)
-		span.AddEvent("Handled with go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp", trace.WithAttributes(uk.String(bag.Member("username").Value())))
+		span.AddEvent("Handled with otelhttp", trace.WithAttributes(uk.String(bag.Member("username").Value())))
 
-		fmt.Fprint(w, "Hello, world!")
+		fmt.Fprint(w, "Hello, world!\n")
 	}
 }
