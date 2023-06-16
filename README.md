@@ -10,7 +10,7 @@ OpenTelemetry Playground
 
 ## Running with collector exporter via otlp
 
-  1. Start Jaeger with `docker compose up jaeger -d`
-  1. Start OTel Collector with `docker compose up collector -d`
+  1. Start Jaeger with `docker compose up -d jaeger`
+  1. Start OTel Collector with `docker compose up -d collector`
   1. Run the application with `go run .`
   1. Opean the Jaeger UI at http://localhost:16686/
